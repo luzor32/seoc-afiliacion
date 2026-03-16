@@ -43,6 +43,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('beneficios.index') }}">Lista de Beneficios</a>
                     </li>
+                    <li class="nav-item">
+                            <a class="nav-link" href="{{ route('empresas.index') }}">Empresas</a>
+                        </li>
 
                     <!-- Enlaces dependientes de $afiliado -->
                     @isset($afiliado)
@@ -56,9 +59,7 @@
                             <a class="nav-link" href="{{ route('afiliados.beneficios.asignar', $afiliado->id) }}">Beneficios
                                 del Afiliado</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('empresas.index') }}">Empresas</a>
-                        </li>
+                        
                     @endisset
 
                 </ul>

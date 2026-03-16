@@ -5,26 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Afiliado;
 use App\Models\Empresa;
 use Illuminate\Http\Request;
-use App\Models\PagoCuota;
-use App\Models\CargaFamiliar;
-use App\Models\Beneficio;
-
-
 
 class AfiliadoController extends Controller
 {
-    // Mostrar todos los afiliados activos
+
+    // LISTA DE AFILIADOS ACTIVOS
     public function index()
     {
-        $afiliados = Afiliado::with('empresa')
-            ->where('estado_afiliado', 'activo')
-            ->get();
+        $afiliados = Afiliado::with('empresa')->get(); // Trae todos los afiliados
 
         return view('afiliados.index', compact('afiliados'));
     }
 
 
-
+    // VER AFILIADO
     public function show($id)
     {
         $afiliado = Afiliado::with([
@@ -38,16 +32,16 @@ class AfiliadoController extends Controller
     }
 
 
-
-
-    // Mostrar formulario para nueva solicitud
+    // FORMULARIO NUEVA SOLICITUD
     public function create()
     {
         $empresas = Empresa::all();
+
         return view('afiliados.create', compact('empresas'));
     }
 
-    // Guardar nueva solicitud
+
+    // GUARDAR SOLICITUD
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -56,43 +50,80 @@ class AfiliadoController extends Controller
             'apellido' => 'required|string|max:100',
             'dni' => 'required|unique:afiliados,dni',
             'cuil' => 'nullable|string|max:20',
-            'nacionalidad' => 'nullable|string|max:50',
-            'fecha_nacimiento' => 'nullable|date',
-            'provincia' => 'nullable|string|max:50',
-            'localidad' => 'nullable|string|max:50',
-            'calle' => 'nullable|string|max:100',
-            'numero' => 'nullable|string|max:20',
-            'codigo_postal' => 'nullable|string|max:10',
             'telefono' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
             'empresa_id' => 'required|exists:empresas,id',
-            'puesto' => 'nullable|string|max:50',
-            'categoria_laboral' => 'nullable|string|max:50',
-            'seccion' => 'nullable|string|max:50',
-            'tipo_contrato' => 'nullable|string|max:50',
-            'jornada_laboral' => 'nullable|string|max:50',
-            'fecha_afiliacion' => 'nullable|date',
-            'seccional' => 'nullable|string|max:50',
-            'delegacion_sindical' => 'nullable|string|max:50',
+
             'foto_dni_frente' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'foto_dni_dorso' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'foto_recibo_sueldo' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'foto_constancia_laboral' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-
-            'observaciones' => 'nullable|string',
         ]);
 
-        // Todas las solicitudes empiezan pendientes
+
+        /*
+        |--------------------------------------------------------------------------
+        | GUARDAR DOCUMENTOS
+        |--------------------------------------------------------------------------
+        | Se guardan en storage/app/public/afiliados
+        | Laravel devolverá algo como:
+        | afiliados/archivo.jpg
+        |
+        */
+
+        if ($request->hasFile('foto_dni_frente')) {
+            $data['foto_dni_frente'] = $request->file('foto_dni_frente')
+                ->store('afiliados', 'public');
+        }
+
+        if ($request->hasFile('foto_dni_dorso')) {
+            $data['foto_dni_dorso'] = $request->file('foto_dni_dorso')
+                ->store('afiliados', 'public');
+        }
+
+        if ($request->hasFile('foto_recibo_sueldo')) {
+            $data['foto_recibo_sueldo'] = $request->file('foto_recibo_sueldo')
+                ->store('afiliados', 'public');
+        }
+
+        if ($request->hasFile('foto_constancia_laboral')) {
+            $data['foto_constancia_laboral'] = $request->file('foto_constancia_laboral')
+                ->store('afiliados', 'public');
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ESTADO INICIAL DE LA SOLICITUD
+        |--------------------------------------------------------------------------
+        */
+
         $data['estado_solicitud'] = 'pendiente';
         $data['estado_afiliado'] = 'inactivo';
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREAR AFILIADO
+        |--------------------------------------------------------------------------
+        */
+
         Afiliado::create($data);
 
-        return redirect()->route('afiliados.solicitudes')
+
+        /*
+        |--------------------------------------------------------------------------
+        | REDIRECCION
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route('afiliados.solicitudes')
             ->with('mensaje', 'Solicitud enviada correctamente');
     }
 
-    // Listar solicitudes pendientes
+
+    // LISTA DE SOLICITUDES
     public function solicitudes()
     {
         $solicitudes = Afiliado::with('empresa')
@@ -102,28 +133,18 @@ class AfiliadoController extends Controller
         return view('afiliados.solicitudes', compact('solicitudes'));
     }
 
-    // Aprobar solicitud
-    public function aprobar($id)
-    {
-        $afiliado = Afiliado::findOrFail($id);
-        $afiliado->estado_solicitud = 'aprobada';
-        $afiliado->estado_afiliado = 'activo';
-        $afiliado->fecha_afiliacion = now();
-        $afiliado->save();
 
-        return redirect()->back()->with('mensaje', 'Solicitud aprobada y afiliado activo');
-    }
-
-    // Editar afiliado activo
+    // EDITAR SOLICITUD
     public function edit($id)
     {
-        $afiliado = Afiliado::with('empresa', 'cargasFamiliares', 'pagocuota')->findOrFail($id);
+        $afiliado = Afiliado::findOrFail($id);
         $empresas = Empresa::all();
 
         return view('afiliados.edit', compact('afiliado', 'empresas'));
     }
 
-    // Actualizar afiliado activo
+
+    // ACTUALIZAR SOLICITUD
     public function update(Request $request, $id)
     {
         $afiliado = Afiliado::findOrFail($id);
@@ -134,39 +155,42 @@ class AfiliadoController extends Controller
             'apellido' => 'required|string|max:100',
             'dni' => 'required|unique:afiliados,dni,' . $afiliado->id,
             'cuil' => 'nullable|string|max:20',
-            'nacionalidad' => 'nullable|string|max:50',
-            'fecha_nacimiento' => 'nullable|date',
-            'provincia' => 'nullable|string|max:50',
-            'localidad' => 'nullable|string|max:50',
-            'calle' => 'nullable|string|max:100',
-            'numero' => 'nullable|string|max:20',
-            'codigo_postal' => 'nullable|string|max:10',
             'telefono' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
             'empresa_id' => 'required|exists:empresas,id',
-            'puesto' => 'nullable|string|max:50',
-            'categoria_laboral' => 'nullable|string|max:50',
-            'seccion' => 'nullable|string|max:50',
-            'tipo_contrato' => 'nullable|string|max:50',
-            'jornada_laboral' => 'nullable|string|max:50',
-            'fecha_afiliacion' => 'nullable|date',
-            'seccional' => 'nullable|string|max:50',
-            'delegacion_sindical' => 'nullable|string|max:50',
+
             'foto_dni_frente' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'foto_dni_dorso' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'foto_recibo_sueldo' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
             'foto_constancia_laboral' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-
-            'observaciones' => 'nullable|string',
         ]);
+
+
+        // ACTUALIZAR IMÁGENES SI SE SUBEN NUEVAS
+        if ($request->hasFile('foto_dni_frente')) {
+            $data['foto_dni_frente'] = $request->file('foto_dni_frente')->store('afiliados', 'public');
+        }
+
+        if ($request->hasFile('foto_dni_dorso')) {
+            $data['foto_dni_dorso'] = $request->file('foto_dni_dorso')->store('afiliados', 'public');
+        }
+
+        if ($request->hasFile('foto_recibo_sueldo')) {
+            $data['foto_recibo_sueldo'] = $request->file('foto_recibo_sueldo')->store('afiliados', 'public');
+        }
+
+        if ($request->hasFile('foto_constancia_laboral')) {
+            $data['foto_constancia_laboral'] = $request->file('foto_constancia_laboral')->store('afiliados', 'public');
+        }
 
         $afiliado->update($data);
 
-        return redirect()->route('afiliados.index')
-            ->with('mensaje', 'Afiliado actualizado correctamente');
+        return redirect()->route('afiliados.solicitudes')
+            ->with('mensaje', 'Solicitud actualizada correctamente');
     }
 
-    // Eliminar afiliado o solicitud
+
+    // ELIMINAR AFILIADO O SOLICITUD
     public function destroy($id)
     {
         $afiliado = Afiliado::findOrFail($id);
@@ -174,4 +198,63 @@ class AfiliadoController extends Controller
 
         return redirect()->back()->with('mensaje', 'Registro eliminado correctamente');
     }
+
+    // Aprobar solicitud
+   
+
+    public function aprobar($id)
+    {
+        $afiliado = Afiliado::findOrFail($id);
+
+        $afiliado->estado_solicitud = 'aprobada';
+        $afiliado->estado_afiliado = 'activo';
+
+        $afiliado->save();
+
+        return redirect()->route('afiliados.index')
+            ->with('mensaje','Afiliado aprobado correctamente');
+    }
+
+    public function rechazar(Request $request, $id)
+    {
+        $request->validate([
+            'observaciones' => 'required|string'
+        ]);
+
+        $afiliado = Afiliado::findOrFail($id);
+
+        $afiliado->estado_solicitud = 'rechazada';
+        $afiliado->observaciones = $request->observaciones;
+
+        $afiliado->save();
+
+        return redirect()->route('afiliados.solicitudes')
+            ->with('mensaje','Solicitud rechazada');
+    }
+
+    public function activar($id)
+    {
+        $afiliado = Afiliado::findOrFail($id);
+
+        $afiliado->estado_afiliado = 'activo';
+        $afiliado->save();
+
+        return back()->with('mensaje','Afiliado activado');
+    }
+    public function inactivar(Request $request, $id)
+    {
+        $request->validate([
+            'observaciones' => 'required|string'
+        ]);
+
+        $afiliado = Afiliado::findOrFail($id);
+
+        $afiliado->estado_afiliado = 'inactivo';
+        $afiliado->observaciones = $request->observaciones;
+
+        $afiliado->save();
+
+        return back()->with('mensaje','Afiliado inactivado');
+    }
+
 }

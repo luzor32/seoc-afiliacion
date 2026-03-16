@@ -67,8 +67,23 @@ Route::prefix('afiliados/{afiliado}/pagos')->group(function () {
 Route::resource('beneficios', BeneficioController::class)
     ->parameters(['beneficios' => 'beneficio']);
 
+
+    
+
 // Rutas para asignar beneficios a un afiliado
 Route::get('afiliados/{afiliado}/beneficios', [BeneficioController::class, 'asignarForm'])
     ->name('afiliados.beneficios.asignar');
 Route::post('afiliados/{afiliado}/beneficios', [BeneficioController::class, 'asignar'])
     ->name('afiliados.beneficios.asignar.store');
+
+Route::post('/afiliados/{id}/aprobar', [AfiliadoController::class, 'aprobar'])
+    ->name('afiliados.aprobar');
+
+Route::post('/afiliados/{id}/rechazar', [AfiliadoController::class, 'rechazar'])
+    ->name('afiliados.rechazar');
+
+Route::post('/afiliados/{id}/activar', [AfiliadoController::class, 'activar'])
+    ->name('afiliados.activar');
+
+Route::post('/afiliados/{id}/inactivar', [AfiliadoController::class, 'inactivar'])
+    ->name('afiliados.inactivar');    
