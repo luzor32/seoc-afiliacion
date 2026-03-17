@@ -200,7 +200,7 @@ class AfiliadoController extends Controller
     }
 
     // Aprobar solicitud
-   
+
 
     public function aprobar($id)
     {

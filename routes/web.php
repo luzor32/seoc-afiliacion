@@ -68,7 +68,7 @@ Route::resource('beneficios', BeneficioController::class)
     ->parameters(['beneficios' => 'beneficio']);
 
 
-    
+
 
 // Rutas para asignar beneficios a un afiliado
 Route::get('afiliados/{afiliado}/beneficios', [BeneficioController::class, 'asignarForm'])
@@ -86,4 +86,7 @@ Route::post('/afiliados/{id}/activar', [AfiliadoController::class, 'activar'])
     ->name('afiliados.activar');
 
 Route::post('/afiliados/{id}/inactivar', [AfiliadoController::class, 'inactivar'])
-    ->name('afiliados.inactivar');    
+    ->name('afiliados.inactivar');
+
+
+

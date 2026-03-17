@@ -52,10 +52,10 @@
                 <td>
 
                     <!-- Ver solicitud -->
-                    <a href="{{ route('afiliados.show', $afiliado->id) }}"
-                       class="btn btn-info btn-sm">
-                       Ver
-                    </a>
+                    <a href="{{ route('afiliados.show', $afiliado->id) }}?modo=solicitud"
+   class="btn btn-info btn-sm">
+   👁 Ver
+</a>
 
                     <!-- Editar solicitud -->
                     <a href="{{ route('afiliados.edit', $afiliado->id) }}"
