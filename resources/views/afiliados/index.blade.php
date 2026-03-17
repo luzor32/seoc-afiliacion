@@ -42,12 +42,14 @@
                             @endif
                         </td>
                         <td class="text-center">
+                            <a href="{{ route('afiliados.show', ['afiliado' => $afiliado->id, 'origen' => 'afiliado']) }}"
+                                class="btn btn-secondary btn-sm"title="Ver">
+                                <i class="bi bi-eye"></i>>
+                            </a>
                             <a href="{{ route('afiliados.edit', $afiliado->id) }}" class="btn btn-warning btn-sm" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="{{ route('afiliados.show', $afiliado->id) }}" class="btn btn-secondary btn-sm" title="Ver">
-                                <i class="bi bi-eye"></i>
-                            </a>
+                            
                             <form action="{{ route('afiliados.destroy', $afiliado->id) }}" method="POST" style="display:inline-block;">
                                 @csrf
                                 @method('DELETE')

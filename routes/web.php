@@ -15,20 +15,39 @@ Route::get('/', function () {
 });
 
 // ----------------------
-// Afiliados
+// AFILIADOS
 // ----------------------
-Route::get('afiliados/solicitudes', [AfiliadoController::class, 'solicitudes'])->name('afiliados.solicitudes');
-Route::post('afiliados/{id}/aprobar', [AfiliadoController::class, 'aprobar'])->name('afiliados.aprobar');
+
+// Solicitudes
+Route::get('afiliados/solicitudes', [AfiliadoController::class, 'solicitudes'])
+    ->name('afiliados.solicitudes');
+
+// Acciones sobre solicitud / afiliado
+Route::post('/afiliados/{id}/aprobar', [AfiliadoController::class, 'aprobar'])
+    ->name('afiliados.aprobar');
+
+Route::post('/afiliados/{id}/rechazar', [AfiliadoController::class, 'rechazar'])
+    ->name('afiliados.rechazar');
+
+Route::post('/afiliados/{id}/activar', [AfiliadoController::class, 'activar'])
+    ->name('afiliados.activar');
+
+Route::post('/afiliados/{id}/suspender', [AfiliadoController::class, 'suspender'])
+    ->name('afiliados.suspender');
+
+// Resource principal
 Route::resource('afiliados', AfiliadoController::class)
     ->parameters(['afiliados' => 'afiliado']);
 
+
 // ----------------------
-// Empresas
+// EMPRESAS
 // ----------------------
 Route::resource('empresas', EmpresaController::class);
 
+
 // ----------------------
-// Cargas familiares (integradas al afiliado)
+// CARGAS FAMILIARES
 // ----------------------
 Route::prefix('afiliados/{afiliado}/cargas')->group(function () {
 
@@ -38,7 +57,7 @@ Route::prefix('afiliados/{afiliado}/cargas')->group(function () {
 
     Route::post('/store', [CargaFamiliarController::class, 'store'])->name('cargas.store');
 
-    Route::get('/{id}', [CargaFamiliarController::class, 'show'])->name('cargas.show'); // 👈 ESTA FALTA
+    Route::get('/{id}', [CargaFamiliarController::class, 'show'])->name('cargas.show');
 
     Route::get('/{id}/edit', [CargaFamiliarController::class, 'edit'])->name('cargas.edit');
 
@@ -50,43 +69,34 @@ Route::prefix('afiliados/{afiliado}/cargas')->group(function () {
 
 
 // ----------------------
-// Pagos de cuotas (por afiliado)
+// PAGOS DE CUOTAS
 // ----------------------
 Route::prefix('afiliados/{afiliado}/pagos')->group(function () {
+
     Route::get('/', [PagoCuotaController::class, 'index'])->name('pagos_cuotas.index');
+
     Route::get('/create', [PagoCuotaController::class, 'create'])->name('pagos_cuotas.create');
+
     Route::post('/', [PagoCuotaController::class, 'store'])->name('pagos_cuotas.store');
+
     Route::get('/{id}/edit', [PagoCuotaController::class, 'edit'])->name('pagos_cuotas.edit');
+
     Route::put('/{id}', [PagoCuotaController::class, 'update'])->name('pagos_cuotas.update');
+
     Route::delete('/{id}', [PagoCuotaController::class, 'destroy'])->name('pagos_cuotas.destroy');
+
 });
 
+
 // ----------------------
-// Beneficios
+// BENEFICIOS
 // ----------------------
 Route::resource('beneficios', BeneficioController::class)
     ->parameters(['beneficios' => 'beneficio']);
 
-
-
-
-// Rutas para asignar beneficios a un afiliado
+// Asignar beneficios a afiliado
 Route::get('afiliados/{afiliado}/beneficios', [BeneficioController::class, 'asignarForm'])
     ->name('afiliados.beneficios.asignar');
+
 Route::post('afiliados/{afiliado}/beneficios', [BeneficioController::class, 'asignar'])
     ->name('afiliados.beneficios.asignar.store');
-
-Route::post('/afiliados/{id}/aprobar', [AfiliadoController::class, 'aprobar'])
-    ->name('afiliados.aprobar');
-
-Route::post('/afiliados/{id}/rechazar', [AfiliadoController::class, 'rechazar'])
-    ->name('afiliados.rechazar');
-
-Route::post('/afiliados/{id}/activar', [AfiliadoController::class, 'activar'])
-    ->name('afiliados.activar');
-
-Route::post('/afiliados/{id}/inactivar', [AfiliadoController::class, 'inactivar'])
-    ->name('afiliados.inactivar');
-
-
-

@@ -19,7 +19,7 @@ class AfiliadoController extends Controller
 
 
     // VER AFILIADO
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $afiliado = Afiliado::with([
             'empresa',
@@ -28,7 +28,9 @@ class AfiliadoController extends Controller
             'beneficio'
         ])->findOrFail($id);
 
-        return view('afiliados.show', compact('afiliado'));
+        $origen = $request->get('origen'); // 👈 ACA ESTA LA CLAVE
+
+        return view('afiliados.show', compact('afiliado', 'origen'));
     }
 
 
@@ -45,21 +47,49 @@ class AfiliadoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'numero_afiliado' => 'required|unique:afiliados,numero_afiliado',
-            'nombre' => 'required|string|max:100',
-            'apellido' => 'required|string|max:100',
-            'dni' => 'required|unique:afiliados,dni',
-            'cuil' => 'nullable|string|max:20',
-            'telefono' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:100',
-            'empresa_id' => 'required|exists:empresas,id',
 
-            'foto_dni_frente' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-            'foto_dni_dorso' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-            'foto_recibo_sueldo' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-            'foto_constancia_laboral' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-        ]);
+        // PERSONALES
+        'numero_afiliado' => 'required|unique:afiliados,numero_afiliado',
+        'nombre' => 'required|string|max:100',
+        'apellido' => 'required|string|max:100',
+        'dni' => 'required|unique:afiliados,dni',
+        'cuil' => 'nullable|string|max:20',
+        'nacionalidad' => 'nullable|string|max:50',
+        'fecha_nacimiento' => 'nullable|date',
 
+        // DOMICILIO
+        'provincia' => 'nullable|string|max:100',
+        'localidad' => 'nullable|string|max:100',
+        'calle' => 'nullable|string|max:150',
+        'numero' => 'nullable|string|max:10',
+        'codigo_postal' => 'nullable|string|max:10',
+
+        // CONTACTO
+        'telefono' => 'nullable|string|max:20',
+        'email' => 'nullable|email|max:100',
+
+        // LABORAL
+        'empresa_id' => 'required|exists:empresas,id',
+        'puesto' => 'nullable|string|max:100',
+        'categoria_laboral' => 'nullable|string|max:100',
+        'seccion' => 'nullable|string|max:100',
+        'tipo_contrato' => 'nullable|string|max:100',
+        'jornada_laboral' => 'nullable|string|max:100',
+
+        // SINDICAL
+        'fecha_afiliacion' => 'nullable|date',
+        'seccional' => 'nullable|string|max:100',
+        'delegacion_sindical' => 'nullable|string|max:100',
+
+        // OBSERVACIONES
+        'observaciones' => 'nullable|string',
+
+        // DOCUMENTOS
+        'foto_dni_frente' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+        'foto_dni_dorso' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+        'foto_recibo_sueldo' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+        'foto_constancia_laboral' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+    ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -150,20 +180,49 @@ class AfiliadoController extends Controller
         $afiliado = Afiliado::findOrFail($id);
 
         $data = $request->validate([
-            'numero_afiliado' => 'required|unique:afiliados,numero_afiliado,' . $afiliado->id,
-            'nombre' => 'required|string|max:100',
-            'apellido' => 'required|string|max:100',
-            'dni' => 'required|unique:afiliados,dni,' . $afiliado->id,
-            'cuil' => 'nullable|string|max:20',
-            'telefono' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:100',
-            'empresa_id' => 'required|exists:empresas,id',
 
-            'foto_dni_frente' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-            'foto_dni_dorso' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-            'foto_recibo_sueldo' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-            'foto_constancia_laboral' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
-        ]);
+        // PERSONALES
+        'numero_afiliado' => 'required|unique:afiliados,numero_afiliado,' . $afiliado->id,
+        'nombre' => 'required|string|max:100',
+        'apellido' => 'required|string|max:100',
+        'dni' => 'required|unique:afiliados,dni,' . $afiliado->id,
+        'cuil' => 'nullable|string|max:20',
+        'nacionalidad' => 'nullable|string|max:50',
+        'fecha_nacimiento' => 'nullable|date',
+
+        // DOMICILIO
+        'provincia' => 'nullable|string|max:100',
+        'localidad' => 'nullable|string|max:100',
+        'calle' => 'nullable|string|max:150',
+        'numero' => 'nullable|string|max:10',
+        'codigo_postal' => 'nullable|string|max:10',
+
+        // CONTACTO
+        'telefono' => 'nullable|string|max:20',
+        'email' => 'nullable|email|max:100',
+
+        // LABORAL
+        'empresa_id' => 'required|exists:empresas,id',
+        'puesto' => 'nullable|string|max:100',
+        
+        
+        'tipo_contrato' => 'nullable|string|max:100',
+        'jornada_laboral' => 'nullable|string|max:100',
+
+        // SINDICAL
+        'fecha_afiliacion' => 'nullable|date',
+        'seccional' => 'nullable|string|max:100',
+        'delegacion_sindical' => 'nullable|string|max:100',
+
+        // OBSERVACIONES
+        'observaciones' => 'nullable|string',
+
+        // DOCUMENTOS
+        'foto_dni_frente' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+        'foto_dni_dorso' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+        'foto_recibo_sueldo' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+        'foto_constancia_laboral' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
+    ]);
 
 
         // ACTUALIZAR IMÁGENES SI SE SUBEN NUEVAS
@@ -211,7 +270,7 @@ class AfiliadoController extends Controller
 
         $afiliado->save();
 
-        return redirect()->route('afiliados.index')
+        return redirect()->route('afiliados.solicitudes')
             ->with('mensaje','Afiliado aprobado correctamente');
     }
 
@@ -241,7 +300,7 @@ class AfiliadoController extends Controller
 
         return back()->with('mensaje','Afiliado activado');
     }
-    public function inactivar(Request $request, $id)
+    public function suspender(Request $request, $id)
     {
         $request->validate([
             'observaciones' => 'required|string'
@@ -249,12 +308,12 @@ class AfiliadoController extends Controller
 
         $afiliado = Afiliado::findOrFail($id);
 
-        $afiliado->estado_afiliado = 'inactivo';
+        $afiliado->estado_afiliado = 'suspendido';
         $afiliado->observaciones = $request->observaciones;
 
         $afiliado->save();
 
-        return back()->with('mensaje','Afiliado inactivado');
+        return back()->with('mensaje','Afiliado suspendido');
     }
 
 }

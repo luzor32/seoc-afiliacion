@@ -346,11 +346,7 @@
 
                     <div class="mb-4">
 
-                        <label class="form-label">Observaciones</label>
-
-                        <textarea name="observaciones" class="form-control" rows="3">{{ old('observaciones') }}</textarea>
-
-                    </div>
+                      
 
 
                     <div class="text-end">

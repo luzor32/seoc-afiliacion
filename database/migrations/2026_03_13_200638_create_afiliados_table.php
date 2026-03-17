@@ -62,7 +62,7 @@ return new class extends Migration
 
             // Estados
             $table->enum('estado_solicitud', ['pendiente','aprobada','rechazada'])->default('pendiente');
-            $table->enum('estado_afiliado', ['activo','inactivo','suspendido','baja'])->default('inactivo');
+            $table->enum('estado_afiliado', ['activo','suspendido','baja'])->default('activo');
 
             // Observaciones
             $table->text('observaciones')->nullable();
