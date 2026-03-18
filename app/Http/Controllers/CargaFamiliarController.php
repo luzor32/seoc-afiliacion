@@ -40,6 +40,7 @@ class CargaFamiliarController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
+            'dni' => 'required|string|max:20',
             'parentesco' => 'required|in:Cónyuge,Hijo,Hijastro',
             'fecha_nacimiento' => 'nullable|date',
         ]);
@@ -92,6 +93,7 @@ class CargaFamiliarController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
+            'dni' => 'required|string|max:20',
             'parentesco' => 'required|in:Cónyuge,Hijo,Hijastro',
             'fecha_nacimiento' => 'nullable|date',
         ]);

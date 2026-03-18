@@ -45,6 +45,10 @@
             <label>Apellido</label>
             <input type="text" name="apellido" class="form-control" value="{{ old('apellido', $carga->apellido ?? '') }}" required>
         </div>
+        <div class="mb-3">
+            <label>DNI</label>
+            <input type="text" name="dni" class="form-control" value="{{ old('dni', $carga->d ?? '') }}" required>
+        </div>
 
         <div class="mb-3">
             <label>Parentesco</label>

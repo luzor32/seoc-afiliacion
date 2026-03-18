@@ -2,76 +2,127 @@
 
 @section('content')
     <div class="container">
-        <h3>Cargas familiares de {{ $afiliado->nombre }} {{ $afiliado->apellido }}</h3>
 
-        <!-- Botón agregar carga (solo si el afiliado está activo y aprobado) -->
-        @if ($afiliado->estado_afiliado == 'activo' && $afiliado->estado_solicitud == 'aprobada')
-            <a href="{{ route('cargas.create', $afiliado->id) }}" class="btn btn-primary mb-3">Agregar carga</a>
-        @endif
+        {{-- ===================== TITULO ===================== --}}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold">
+                👨‍👩‍👧‍👦 Cargas familiares de {{ $afiliado->nombre }} {{ $afiliado->apellido }}
+            </h3>
 
-        <!-- Mensajes flash -->
-        
+            {{-- BOTON AGREGAR --}}
+            @if ($afiliado->estado_afiliado == 'activo' && $afiliado->estado_solicitud == 'aprobada')
+                <a href="{{ route('cargas.create', $afiliado->id) }}" class="btn btn-primary btn-lg">
+                    ➕ Agregar carga
+                </a>
+            @endif
+        </div>
 
+        {{-- ===================== ERRORES ===================== --}}
         @if ($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show">
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
-        <!-- Tabla de cargas -->
-        <table class="table-bordered table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Parentesco</th>
-                    <th>Documentos</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($cargas as $c)
-                    <tr>
-                        <td>{{ $c->nombre }}</td>
-                        <td>{{ $c->apellido }}</td>
-                        <td>{{ $c->parentesco }}</td>
-                        <td>
-                            @if ($c->parentesco == 'Hijo')
-                                @if ($c->foto_partida_nacimiento)
-                                    Partida ✔
-                                @endif
-                                @if ($c->constancia_escolaridad)
-                                    Escolaridad ✔
-                                @endif
-                                @if ($c->certificado_discapacidad)
-                                    Discapacidad ✔
-                                @endif
-                            @elseif($c->parentesco == 'Cónyuge')
-                                @if ($c->foto_acta_matrimonio)
-                                    Acta ✔
-                                @endif
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('cargas.edit', [$afiliado->id, $c->id]) }}"
-                                class="btn btn-sm btn-warning">Editar</a>
-                            <form action="{{ route('cargas.destroy', [$afiliado->id, $c->id]) }}" method="POST"
-                                style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-danger"
-                                    onclick="return confirm('¿Eliminar carga familiar?')">Eliminar</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <a href="{{ route('afiliados.show', $afiliado->id) }}" class="btn btn-secondary mt-3">Volver</a>
+        {{-- ===================== CARD ===================== --}}
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-light">
+                <strong>📋 Listado de cargas familiares</strong>
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table-hover table text-center align-middle" style="table-layout: fixed;">
+
+                        <thead class="bg-danger text-center text-white">
+                            <tr>
+                                <th style="width:18%">Nombre</th>
+                                <th style="width:18%">Apellido</th>
+                                <th style="width:15%">Parentesco</th>
+                                <th style="width:15%">DNI</th>
+                                
+                                <th style="width:16%">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @forelse ($cargas as $c)
+                                <tr>
+
+                                    <td>{{ $c->nombre }}</td>
+                                    <td>{{ $c->apellido }}</td>
+                                    <td>{{ $c->parentesco }}</td>
+
+                                    {{-- DNI --}}
+                                    <td style="white-space: nowrap;">
+                                        {{ $c->dni ?? '-' }}
+                                    </td>
+
+
+
+                                    {{-- ACCIONES --}}
+                                    <td>
+                                        <div class="d-flex justify-content-center flex-nowrap gap-2">
+                                            {{-- VER --}}
+                                            <a href="{{ route('cargas.show', [$afiliado->id, $c->id]) }}"
+                                                class="btn btn-outline-info btn-sm" title="Ver">
+                                                👁️
+                                            </a>
+
+                                            {{-- EDITAR --}}
+                                            <a href="{{ route('cargas.edit', [$afiliado->id, $c->id]) }}"
+                                                class="btn btn-outline-warning btn-sm" title="Editar">
+                                                ✏️
+                                            </a>
+
+                                            {{-- ELIMINAR --}}
+                                            <form action="{{ route('cargas.destroy', [$afiliado->id, $c->id]) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button class="btn btn-outline-danger btn-sm"
+                                                    onclick="return confirm('¿Eliminar carga familiar?')" title="Eliminar">
+                                                    🗑
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-muted text-center">
+                                        No hay cargas familiares registradas
+                                    </td>
+                                </tr>
+                            @endforelse
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+        </div>
+
+        {{-- ===================== VOLVER ===================== --}}
+        <div class="mt-3 text-end">
+            <a href="{{ route('afiliados.edit', $afiliado->id) }}" class="btn btn-secondary btn-lg">
+                ↩ Volver
+            </a>
+        </div>
+
     </div>
 @endsection

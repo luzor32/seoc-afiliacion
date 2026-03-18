@@ -1,3 +1,6 @@
+@php
+    $esSolicitud = request('origen') == 'solicitud';
+@endphp
 @extends('layouts.app')
 
 @section('content')
@@ -5,8 +8,15 @@
 
         <div class="card border-0 shadow-lg">
 
-            <div class="card-header bg-danger text-white">
-                <h4 class="mb-0">✏️ Editar Afiliado</h4>
+            <div class="mb-3">
+                <h3 class="fw-bold">
+                    📋
+                    @if (request('origen') == 'solicitud')
+                        Editar Solicitud
+                    @else
+                        Editar Afiliado
+                    @endif
+                </h3>
             </div>
 
             <div class="card-body">
@@ -249,6 +259,43 @@
 
                     </div>
 
+                    {{-- ===================== CARGAS Y BENEFICIOS ===================== --}}
+                    @if (!$esSolicitud && $afiliado->estado_afiliado == 'activo')
+                        <div class="card mt-4 border-0 shadow-sm">
+
+                            <div class="card-header bg-light">
+                                <strong>👨‍👩‍👧 Gestión del afiliado</strong>
+                            </div>
+
+                            <div class="card-body">
+
+                                {{-- ===================== CARGAS FAMILIARES ===================== --}}
+                                <h5 class="mb-3">Cargas familiares</h5>
+
+                                <a href="{{ route('cargas.index', $afiliado->id) }}"
+                                    class="btn btn-outline-primary mb-3">
+                                    👨‍👩‍👧 Ver cargas familiares
+                                </a>
+
+                                <a href="{{ route('cargas.create', $afiliado->id) }}" class="btn btn-primary mb-3">
+                                    ➕ Nueva carga familiar
+                                </a>
+
+                                <hr>
+
+                                {{-- ===================== BENEFICIOS ===================== --}}
+                                <h5 class="mb-3">Beneficios</h5>
+
+                                <a href="{{ route('afiliados.beneficios.asignar', $afiliado->id) }}"
+                                    class="btn btn-outline-success">
+                                    🎁 Gestionar beneficios
+                                </a>
+
+                            </div>
+
+                        </div>
+                    @endif
+
 
                     {{-- ===================== DOCUMENTACION ===================== --}}
 
@@ -320,23 +367,33 @@
                         </div>
                     </div>
 
-
-                    <div class="mb-4">
-                        <label>Observaciones</label>
-                        <textarea name="observaciones" class="form-control">
-                            {{ old('observaciones', $afiliado->observaciones) }}
-                        </textarea>
-                    </div>
-
+                    @php
+                        $esSolicitud = request('origen') == 'solicitud';
+                    @endphp
 
                     <div class="text-end">
 
+                        {{-- BOTON GUARDAR --}}
                         <button type="submit" class="btn btn-primary btn-lg">
-                            💾 Actualizar Afiliado
+                            💾
+                            @if ($esSolicitud)
+                                Guardar Solicitud
+                            @else
+                                Guardar Afiliado
+                            @endif
                         </button>
 
-                        <a href="{{ route('afiliados.solicitudes') }}" class="btn btn-secondary btn-lg">
-                            ↩ Volver a Solicitudes
+                        {{-- BOTON VOLVER --}}
+                        <a href="{{ $esSolicitud ? route('afiliados.solicitudes') : route('afiliados.index') }}"
+                            class="btn btn-secondary btn-lg">
+
+                            ↩
+                            @if ($esSolicitud)
+                                Volver a solicitudes
+                            @else
+                                Volver a afiliados
+                            @endif
+
                         </a>
 
                     </div>

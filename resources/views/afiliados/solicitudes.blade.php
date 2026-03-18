@@ -1,88 +1,125 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2>Solicitudes Pendientes</h2>
+    <div class="container">
 
-    @if(session('mensaje'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('mensaje') }}
+        {{-- ===================== TITULO ===================== --}}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold">📋 Solicitudes de Afiliación</h3>
 
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <a href="{{ route('afiliados.create') }}" class="btn btn-primary btn-lg">
+                ➕ Nueva Solicitud
+            </a>
         </div>
-    @endif
 
-    <a href="{{ route('afiliados.create') }}" class="btn btn-primary mb-3">Nueva Solicitud</a>
+        {{-- MENSAJE --}}
+        @if (session('mensaje'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('mensaje') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Número Afiliado</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>DNI</th>
-                <th>Empresa</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
+        {{-- ===================== CARD ===================== --}}
+        <div class="card border-0 shadow-lg">
 
-        <tbody>
-            @foreach($solicitudes as $afiliado)
-            <tr>
-                <td>{{ $afiliado->numero_afiliado }}</td>
-                <td>{{ $afiliado->nombre }}</td>
-                <td>{{ $afiliado->apellido }}</td>
-                <td>{{ $afiliado->dni }}</td>
-                <td>{{ $afiliado->empresa->nombre ?? '' }}</td>
-                <td>
+            <div class="card-header bg-light">
+                <strong>📝 Solicitudes registradas</strong>
+            </div>
 
-                    @if($afiliado->estado_solicitud == 'pendiente')
-                        <span class="badge bg-warning text-dark">Pendiente</span>
+            <div class="card-body">
 
-                    @elseif($afiliado->estado_solicitud == 'aprobada')
-                        <span class="badge bg-success">Aprobada</span>
+                <div class="table-responsive">
+                    <table class="table-hover table align-middle">
 
-                    @elseif($afiliado->estado_solicitud == 'rechazada')
-                        <span class="badge bg-danger">Rechazada</span>
-                    @endif
+                        <thead class="bg-danger text-center text-white">
+                            <tr>
+                                <th>N° Afiliado</th>
+                                <th>Afiliado</th>
+                                <th>DNI</th>
+                                <th>Empresa</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
 
-                </td>
+                        <tbody>
 
-                <td>
+                            @forelse($solicitudes as $afiliado)
+                                <tr class="text-center">
 
-                    <!-- Ver solicitud -->
-                    <a href="{{ route('afiliados.show', ['afiliado' => $afiliado->id, 'origen' => 'solicitud']) }}"
-                    class="btn btn-secondary btn-sm">
-                        Ver
-                    </a>
+                                    <td>{{ $afiliado->numero_afiliado }}</td>
 
-                    <!-- Editar solicitud -->
-                    <a href="{{ route('afiliados.edit', $afiliado->id) }}"
-                       class="btn btn-warning btn-sm">
-                       Editar
-                    </a>
+                                    <td>
+                                        {{ $afiliado->nombre }} {{ $afiliado->apellido }}
+                                    </td>
 
-                    <!-- Eliminar -->
-                    <form action="{{ route('afiliados.destroy', $afiliado->id) }}"
-                          method="POST"
-                          class="d-inline">
+                                    <td>{{ $afiliado->dni }}</td>
 
-                        @csrf
-                        @method('DELETE')
+                                    <td>{{ $afiliado->empresa->nombre ?? 'Sin empresa' }}</td>
 
-                        <button class="btn btn-danger btn-sm"
-                        onclick="return confirm('¿Eliminar solicitud?')">
-                        Eliminar
-                        </button>
+                                    {{-- ESTADO --}}
+                                    <td>
+                                        @if ($afiliado->estado_solicitud == 'pendiente')
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        @elseif($afiliado->estado_solicitud == 'aprobada')
+                                            <span class="badge bg-success">Aprobada</span>
+                                        @elseif($afiliado->estado_solicitud == 'rechazada')
+                                            <span class="badge bg-danger">Rechazada</span>
+                                        @endif
+                                    </td>
 
-                    </form>
+                                    {{-- ACCIONES --}}
+                                    <td>
 
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                                        <div class="d-flex justify-content-center gap-2">
 
-</div>
+                                            {{-- VER --}}
+                                            <a href="{{ route('afiliados.show', ['afiliado' => $afiliado->id, 'origen' => 'solicitud']) }}"
+                                                class="btn btn-outline-secondary btn-sm" title="Ver">
+                                                👁
+                                            </a>
+
+                                            {{-- EDITAR --}}
+
+
+                                            <a href="{{ route('afiliados.edit', ['afiliado' => $afiliado->id, 'origen' => 'solicitud']) }}"
+                                                class="btn btn-outline-warning btn-sm" title="Editar">
+                                                ✏️
+                                            </a>
+
+                                            {{-- ELIMINAR --}}
+                                            <form action="{{ route('afiliados.destroy', $afiliado->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button class="btn btn-outline-danger btn-sm"
+                                                    onclick="return confirm('¿Eliminar solicitud?')" title="Eliminar">
+                                                    🗑
+                                                </button>
+                                            </form>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-muted text-center">
+                                        No hay solicitudes registradas
+                                    </td>
+                                </tr>
+                            @endforelse
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
 @endsection
