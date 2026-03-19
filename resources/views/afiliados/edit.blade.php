@@ -250,7 +250,7 @@
                                 <div class="col">
                                     <label class="form-label">Delegación Sindical</label>
                                     <input type="text" name="delegacion_sindical" class="form-control"
-                                        value="{{ old('delegacion_sindical') }}">
+                                        value="{{ old('delegacion_sindical', $afiliado->delegacion_sindical) }}">
                                 </div>
 
                             </div>

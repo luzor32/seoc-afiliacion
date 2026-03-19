@@ -13,7 +13,7 @@
     </div>
 
     {{-- ===================== CARD ===================== --}}
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-lg">
 
         <div class="card-header bg-light">
             <strong>📋 Beneficios registrados</strong>

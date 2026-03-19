@@ -12,6 +12,30 @@
             </a>
         </div>
 
+        <form method="GET" class="row mb-3">
+
+            <div class="col-md-4">
+                <input type="text" name="buscar" class="form-control" placeholder="Buscar por nombre, apellido, DNI o número de afiliado"
+                    value="{{ request('buscar') }}">
+            </div>
+
+            <div class="col-md-3">
+                <select name="estado_afiliado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="activo" {{ request('estado_afiliado') == 'activo' ? 'selected' : '' }}>Activo</option>
+                    <option value="suspendido" {{ request('estado_afiliado') == 'suspendido' ? 'selected' : '' }}>Suspendido
+                    </option>
+                    <option value="baja" {{ request('estado_afiliado') == 'baja' ? 'selected' : '' }}>Baja</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <button class="btn btn-primary">Buscar</button>
+                <a href="{{ route('afiliados.index') }}" class="btn btn-secondary">Limpiar</a>
+            </div>
+
+        </form>
+
         {{-- MENSAJE --}}
         @if (session('mensaje'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -21,7 +45,7 @@
         @endif
 
         {{-- ===================== CARD ===================== --}}
-        
+
         <div class="card border-0 shadow-lg">
             <div class="card-header bg-light">
                 <strong>👥 Afiliados registrados</strong>
@@ -38,7 +62,9 @@
                                 <th>Afiliado</th>
                                 <th>DNI</th>
                                 <th>Empresa</th>
+                                <th>Fecha de Afiliación</th>
                                 <th>Estado</th>
+                                
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -58,12 +84,14 @@
 
                                     <td>{{ $afiliado->empresa->nombre ?? 'Sin empresa' }}</td>
 
+                                    <td>{{ $afiliado->fecha_afiliacion->format('d/m/Y') ?? 'Sin fecha' }}</td>
+
                                     {{-- ESTADO --}}
                                     <td>
                                         @if ($afiliado->estado_afiliado == 'activo')
                                             <span class="badge bg-success">Activo</span>
                                         @else
-                                            <span class="badge bg-secondary">Inactivo</span>
+                                            <span class="badge bg-danger">suspendido</span>
                                         @endif
                                     </td>
 
@@ -114,6 +142,9 @@
                         </tbody>
 
                     </table>
+                    <div class="d-flex justify-content-center">
+                        {{ $afiliados->links() }}
+                    </div>
                 </div>
 
             </div>

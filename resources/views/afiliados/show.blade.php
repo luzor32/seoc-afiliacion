@@ -210,48 +210,65 @@
 
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Fecha Afiliación</label>
-                        <div class="form-control bg-light">
-                            {{ $afiliado->fecha_afiliacion ?? 'No registrada' }}
+                    @if ($origen != 'solicitud')
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Fecha de Afiliación</label>
+                            <div class="form-control">
+                                {{ $afiliado->fecha_afiliacion?->format('d/m/Y H:i') ?? '-' }}
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     {{-- ===================== ESTADOS ===================== --}}
 
                     @if ($origen == 'solicitud')
-                        <div class="row">
+                        <form id="formAccion" method="POST">
+                            @csrf
 
-                            {{-- ESTADO ACTUAL --}}
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Estado de Solicitud</label>
-                                <div
-                                    class="form-control @if ($afiliado->estado_solicitud == 'pendiente') bg-warning text-dark
-            @elseif($afiliado->estado_solicitud == 'rechazada') bg-danger text-white
-            @elseif($afiliado->estado_solicitud == 'aprobada') bg-success text-white @endif">
-                                    {{ ucfirst($afiliado->estado_solicitud) }}
+                            <div class="row align-items-end">
+
+                                {{-- ESTADO ACTUAL --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Estado de Solicitud</label>
+                                    <div
+                                        class="form-control @if ($afiliado->estado_solicitud == 'pendiente') bg-warning text-dark
+                                        @elseif($afiliado->estado_solicitud == 'rechazada') bg-danger text-white
+                                                @elseif($afiliado->estado_solicitud == 'aprobada') bg-success text-white @endif">
+                                        {{ ucfirst($afiliado->estado_solicitud) }}
+                                    </div>
                                 </div>
+
+                                {{-- CAMBIAR ESTADO --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Cambiar estado</label>
+
+                                    <select name="accion" class="form-select" onchange="cambiarAccion(this)"
+                                        @if($afiliado->estado_solicitud == 'rechazada') disabled @endif>
+
+                                        <option value="">Seleccione</option>
+                                        <option value="aprobar">Aprobar</option>
+                                        <option value="rechazar">Rechazar</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Observaciones</label>
+
+                                @if($afiliado->estado_solicitud == 'rechazada')
+                                    <div class="form-control bg-light text-danger">
+                                        {{ $afiliado->observaciones }}
+                                    </div>
+                                @else
+                                    <textarea name="observaciones" class="form-control"></textarea>
+                                @endif
                             </div>
 
-                            {{-- CAMBIAR ESTADO --}}
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Cambiar estado</label>
-                                <select name="accion" class="form-select" required onchange="cambiarAccion(this)">
-                                    <option value="">Seleccione</option>
-                                    <option value="aprobar">Aprobar</option>
-                                    <option value="rechazar">Rechazar</option>
-                                </select>
-                            </div>
-
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Observaciones</label>
-                            <textarea name="observaciones" class="form-control"></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-secondary">
-                            Guardar
-                        </button>
+                            @if($afiliado->estado_solicitud != 'rechazada')
+                                <button type="submit" class="btn btn-secondary" onclick="return validarAccion()">
+                                    Guardar
+                                </button>
+                            @endif
 
                         </form>
                     @endif
@@ -261,9 +278,8 @@
                     @if ($origen == 'afiliado')
                         <div class="mb-3">
                             <label class="form-label fw-bold">Estado del Afiliado</label>
-                            <div
-                                class="form-control @if ($afiliado->estado_afiliado == 'activo') bg-info text-white
-                                        @elseif($afiliado->estado_afiliado == 'suspendido') bg-danger text-white @endif">
+                            <div class="form-control @if ($afiliado->estado_afiliado == 'activo') bg-info text-white
+                            @elseif($afiliado->estado_afiliado == 'suspendido') bg-danger text-white @endif">
                                 {{ ucfirst($afiliado->estado_afiliado) }}
                             </div>
                         </div>
@@ -381,9 +397,9 @@
                             <label class="form-label fw-bold">DNI Frente</label><br>
 
                             @if ($afiliado->foto_dni_frente)
-                                <img src="{{ asset('storage/' . $afiliado->foto_dni_frente) }}"
-                                    class="img-thumbnail mt-2" style="max-width:150px; cursor:pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalImagen"
+                                <img src="{{ asset('storage/' . $afiliado->foto_dni_frente) }}" class="img-thumbnail mt-2"
+                                    style="max-width:150px; cursor:pointer;" data-bs-toggle="modal"
+                                    data-bs-target="#modalImagen"
                                     onclick="mostrarImagen('{{ asset('storage/' . $afiliado->foto_dni_frente) }}')">
                             @else
                                 <div class="text-muted">Sin imagen</div>
@@ -409,9 +425,9 @@
                             <label class="form-label fw-bold">Recibo de Sueldo</label><br>
 
                             @if ($afiliado->foto_recibo_sueldo)
-                                <img src="{{ asset('storage/' . $afiliado->foto_recibo_sueldo) }}"
-                                    class="img-thumbnail mt-2" style="max-width:150px; cursor:pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalImagen"
+                                <img src="{{ asset('storage/' . $afiliado->foto_recibo_sueldo) }}" class="img-thumbnail mt-2"
+                                    style="max-width:150px; cursor:pointer;" data-bs-toggle="modal"
+                                    data-bs-target="#modalImagen"
                                     onclick="mostrarImagen('{{ asset('storage/' . $afiliado->foto_recibo_sueldo) }}')">
                             @else
                                 <div class="text-muted">Sin imagen</div>
@@ -424,8 +440,8 @@
 
                             @if ($afiliado->foto_constancia_laboral)
                                 <img src="{{ asset('storage/' . $afiliado->foto_constancia_laboral) }}"
-                                    class="img-thumbnail mt-2" style="max-width:150px; cursor:pointer;"
-                                    data-bs-toggle="modal" data-bs-target="#modalImagen"
+                                    class="img-thumbnail mt-2" style="max-width:150px; cursor:pointer;" data-bs-toggle="modal"
+                                    data-bs-target="#modalImagen"
                                     onclick="mostrarImagen('{{ asset('storage/' . $afiliado->foto_constancia_laboral) }}')">
                             @else
                                 <div class="text-muted">Sin imagen</div>
@@ -485,12 +501,23 @@
 
 <script>
     function cambiarAccion(select) {
-        let form = document.getElementById('formEstado');
+        let form = document.getElementById('formAccion'); // ✅ CORREGIDO
+        let id = {{ $afiliado->id }};
 
         if (select.value === 'aprobar') {
-            form.action = "{{ route('afiliados.aprobar', $afiliado->id) }}";
-        } else if (select.value === 'rechazar') {
-            form.action = "{{ route('afiliados.rechazar', $afiliado->id) }}";
+            form.action = '/afiliados/' + id + '/aprobar';
         }
+        else if (select.value === 'rechazar') {
+            form.action = '/afiliados/' + id + '/rechazar';
+        }
+    }
+    function validarAccion() {
+        let select = document.querySelector('select[name="accion"]');
+
+        if (!select.value) {
+            alert('Seleccione una acción');
+            return false;
+        }
+        return true;
     }
 </script>

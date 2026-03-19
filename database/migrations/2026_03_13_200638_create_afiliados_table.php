@@ -46,7 +46,8 @@ return new class extends Migration
             $table->string('jornada_laboral')->nullable();
 
             // Datos sindicales
-            $table->date('fecha_afiliacion')->nullable();
+            
+            $table->dateTime('fecha_afiliacion')->nullable()->change();
             $table->string('seccional')->nullable();
             $table->string('delegacion_sindical')->nullable();
 
@@ -62,7 +63,7 @@ return new class extends Migration
 
             // Estados
             $table->enum('estado_solicitud', ['pendiente','aprobada','rechazada'])->default('pendiente');
-            $table->enum('estado_afiliado', ['activo','suspendido','baja'])->default('activo');
+            $table->enum('estado_afiliado', ['activo','suspendido','baja'])->nullable();
 
             // Observaciones
             $table->text('observaciones')->nullable();

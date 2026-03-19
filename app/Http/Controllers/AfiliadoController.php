@@ -8,11 +8,24 @@ use Illuminate\Http\Request;
 
 class AfiliadoController extends Controller
 {
+  
 
-    // LISTA DE AFILIADOS ACTIVOS
-    public function index()
+    public function index(Request $request)
     {
-        $afiliados = Afiliado::with('empresa')->get(); // Trae todos los afiliados
+        $query = Afiliado::with('empresa')
+            ->whereIn('estado_afiliado', ['activo', 'suspendido']); // 👈 FIX
+
+        // 🔍 BUSCADOR
+        if ($request->filled('buscar')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->buscar . '%')
+                ->orWhere('apellido', 'like', '%' . $request->buscar . '%')
+                ->orWhere('numero_afiliado', 'like', '%' . $request->buscar . '%')
+                ->orWhere('dni', 'like', '%' . $request->buscar . '%');
+            });
+        }
+
+        $afiliados = $query->paginate(2)->withQueryString();
 
         return view('afiliados.index', compact('afiliados'));
     }
@@ -78,7 +91,7 @@ class AfiliadoController extends Controller
 
         // SINDICAL
         'fecha_afiliacion' => 'nullable|date',
-        'seccional' => 'nullable|string|max:100',
+        
         'delegacion_sindical' => 'nullable|string|max:100',
 
         // OBSERVACIONES
@@ -129,7 +142,7 @@ class AfiliadoController extends Controller
         */
 
         $data['estado_solicitud'] = 'pendiente';
-        $data['estado_afiliado'] = 'inactivo';
+        $data['estado_afiliado'] = null; // 👈 clave
 
 
         /*
@@ -150,18 +163,7 @@ class AfiliadoController extends Controller
         return redirect()
             ->route('afiliados.solicitudes')
             ->with('mensaje', 'Solicitud enviada correctamente');
-    }
-
-
-    // LISTA DE SOLICITUDES
-    public function solicitudes()
-    {
-        $solicitudes = Afiliado::with('empresa')
-            ->where('estado_solicitud', 'pendiente')
-            ->get();
-
-        return view('afiliados.solicitudes', compact('solicitudes'));
-    }
+    }    
 
 
     // EDITAR SOLICITUD
@@ -267,6 +269,7 @@ class AfiliadoController extends Controller
 
         $afiliado->estado_solicitud = 'aprobada';
         $afiliado->estado_afiliado = 'activo';
+        $afiliado->fecha_afiliacion = now();
 
         $afiliado->save();
 
@@ -276,13 +279,19 @@ class AfiliadoController extends Controller
 
     public function rechazar(Request $request, $id)
     {
+        $afiliado = Afiliado::findOrFail($id);
+
+        // 🚫 BLOQUEO
+        if ($afiliado->estado_solicitud === 'rechazada') {
+            return redirect()->back()->with('error', 'La solicitud ya fue rechazada');
+        }
+
         $request->validate([
             'observaciones' => 'required|string'
         ]);
 
-        $afiliado = Afiliado::findOrFail($id);
-
         $afiliado->estado_solicitud = 'rechazada';
+        $afiliado->estado_afiliado = null;
         $afiliado->observaciones = $request->observaciones;
 
         $afiliado->save();
@@ -315,5 +324,35 @@ class AfiliadoController extends Controller
 
         return back()->with('mensaje','Afiliado suspendido');
     }
+
+
+
+    public function solicitudes(Request $request)
+    {
+        $query = Afiliado::with('empresa')
+            ->whereIn('estado_solicitud', ['pendiente', 'rechazada']);
+
+        // 🔍 BUSCADOR
+        if ($request->filled('buscar')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->buscar . '%')
+                ->orWhere('apellido', 'like', '%' . $request->buscar . '%')
+                ->orWhere('numero_afiliado', 'like', '%' . $request->buscar . '%')
+                ->orWhere('dni', 'like', '%' . $request->buscar . '%');
+
+            });
+        }
+
+        // 🎯 FILTRO POR ESTADO DE SOLICITUD (opcional)
+        if ($request->filled('estado_solicitud')) {
+            $query->where('estado_solicitud', $request->estado_solicitud);
+        }
+
+        // 📄 PAGINACIÓN
+        $solicitudes = $query->paginate(2)->withQueryString();
+
+        return view('afiliados.solicitudes', compact('solicitudes'));
+    }
+    
 
 }
