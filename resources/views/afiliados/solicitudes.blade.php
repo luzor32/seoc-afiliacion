@@ -9,10 +9,12 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h3 class="fw-bold">📋 Solicitudes de Afiliación</h3>
 
-                <a href="{{ route('afiliados.create') }}" class="btn btn-primary btn-lg">
+                <a href="{{ route('afiliados.create') }}" class="btn btn-outline-secondary btn-lg card border-0 shadow-lg ">
                     ➕ Nueva Solicitud
                 </a>
             </div>
+
+            
 
             {{-- MENSAJE --}}
             @if (session('mensaje'))
@@ -22,30 +24,54 @@
                 </div>
             @endif
 
-            <form method="GET" class="row mb-3">
+            
 
-                <div class="col-md-4">
-                    <input type="text" name="buscar" class="form-control"
-                        placeholder="Buscar por nombre, apellido, DNI o número de afiliado" value="{{ request('buscar') }}">
+            {{-- ===================== BUSCADOR EN LINEA ===================== --}}
+<div class="card border-0 shadow-lg mb-4">
+    <div class="card-body">
+
+        <form method="GET">
+            <div class="row g-2 align-items-center">
+
+                {{-- BUSCAR --}}
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text">🔍</span>
+                        <input type="text" name="buscar" class="form-control"
+                            placeholder="Nombre, apellido, DNI o N° afiliado"
+                            value="{{ request('buscar') }}">
+                    </div>
                 </div>
 
+                {{-- ESTADO --}}
                 <div class="col-md-3">
                     <select name="estado_solicitud" class="form-select">
                         <option value="">Todas</option>
-                        <option value="pendiente" {{ request('estado_solicitud') == 'pendiente' ? 'selected' : '' }}>Pendiente
+                        <option value="pendiente" {{ request('estado_solicitud') == 'pendiente' ? 'selected' : '' }}>
+                            Pendiente
                         </option>
-                        <option value="rechazada" {{ request('estado_solicitud') == 'rechazada' ? 'selected' : '' }}>Rechazada
+                        <option value="rechazada" {{ request('estado_solicitud') == 'rechazada' ? 'selected' : '' }}>
+                            Rechazada
                         </option>
                     </select>
                 </div>
 
-                <div class="col-md-3">
-                    <button class="btn btn-primary">Buscar</button>
-                    <a href="{{ route('afiliados.solicitudes') }}" class="btn btn-secondary">Limpiar</a>
+                {{-- BOTONES --}}
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-primary w-100">
+                         Buscar
+                    </button>
+
+                    <a href="{{ route('afiliados.solicitudes') }}" class="btn btn-outline-secondary w-100">
+                        Limpiar
+                    </a>
                 </div>
 
-            </form>
+            </div>
+        </form>
 
+    </div>
+</div>
 
 
 

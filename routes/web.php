@@ -100,3 +100,7 @@ Route::get('afiliados/{afiliado}/beneficios', [BeneficioController::class, 'asig
 
 Route::post('afiliados/{afiliado}/beneficios', [BeneficioController::class, 'asignar'])
     ->name('afiliados.beneficios.asignar.store');
+
+
+Route::post('/afiliados/{id}/baja', [AfiliadoController::class, 'baja'])->name('afiliados.baja');
+Route::post('/afiliados/{id}/alta-directa', [AfiliadoController::class, 'altaDirecta'])->name('afiliados.altaDirecta');

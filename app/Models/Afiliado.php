@@ -64,7 +64,7 @@ class Afiliado extends Model
     // Conversión automática de fechas
     protected $casts = [
         'fecha_nacimiento' => 'date',
-        'fecha_afiliacion' => 'date',
+        'fecha_afiliacion' => 'datetime',
         'fecha_baja' => 'date'
     ];
 
@@ -92,5 +92,10 @@ class Afiliado extends Model
     public function beneficio()
     {
         return $this->belongsToMany(Beneficio::class, 'afiliado_beneficio');
+    }
+
+    public function historial()
+    {
+        return $this->hasMany(HistorialAfiliado::class);
     }
 }

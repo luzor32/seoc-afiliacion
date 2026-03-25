@@ -7,34 +7,60 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="fw-bold">📋 Listado de Afiliados</h3>
 
-            <a href="{{ route('afiliados.create') }}" class="btn btn-primary btn-lg">
-                ➕ Nueva Solicitud
-            </a>
+            <a href="{{ route('afiliados.create') }}" class="btn btn-outline-secondary btn-lg card border-0 shadow-lg ">
+                    ➕ Nueva Solicitud
+                </a>
         </div>
 
-        <form method="GET" class="row mb-3">
+        {{-- ===================== BUSCADOR INDEX EN LINEA ===================== --}}
+<div class="card border-0 shadow-lg mb-4">
+    <div class="card-body">
 
-            <div class="col-md-4">
-                <input type="text" name="buscar" class="form-control" placeholder="Buscar por nombre, apellido, DNI o número de afiliado"
-                    value="{{ request('buscar') }}">
+        <form method="GET">
+            <div class="row g-2 align-items-center">
+
+                {{-- BUSCAR --}}
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text">🔍</span>
+                        <input type="text" name="buscar" class="form-control"
+                            placeholder="Nombre, apellido, DNI o N° afiliado"
+                            value="{{ request('buscar') }}">
+                    </div>
+                </div>
+
+                {{-- ESTADO AFILIADO --}}
+                <div class="col-md-3">
+                    <select name="estado_afiliado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="activo" {{ request('estado_afiliado') == 'activo' ? 'selected' : '' }}>
+                            Activo
+                        </option>
+                        <option value="suspendido" {{ request('estado_afiliado') == 'suspendido' ? 'selected' : '' }}>
+                            Suspendido
+                        </option>
+                        <option value="baja" {{ request('estado_afiliado') == 'baja' ? 'selected' : '' }}>
+                            Baja
+                        </option>
+                    </select>
+                </div>
+
+                {{-- BOTONES --}}
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-primary w-100">
+                         Buscar
+                    </button>
+
+                    <a href="{{ route('afiliados.index') }}" class="btn btn-outline-secondary w-100">
+                        Limpiar
+                    </a>
+                </div>
+
             </div>
-
-            <div class="col-md-3">
-                <select name="estado_afiliado" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="activo" {{ request('estado_afiliado') == 'activo' ? 'selected' : '' }}>Activo</option>
-                    <option value="suspendido" {{ request('estado_afiliado') == 'suspendido' ? 'selected' : '' }}>Suspendido
-                    </option>
-                    <option value="baja" {{ request('estado_afiliado') == 'baja' ? 'selected' : '' }}>Baja</option>
-                </select>
-            </div>
-
-            <div class="col-md-3">
-                <button class="btn btn-primary">Buscar</button>
-                <a href="{{ route('afiliados.index') }}" class="btn btn-secondary">Limpiar</a>
-            </div>
-
         </form>
+
+    </div>
+</div>
 
         {{-- MENSAJE --}}
         @if (session('mensaje'))

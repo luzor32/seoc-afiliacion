@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Afiliado;
 use App\Models\Empresa;
 use Illuminate\Http\Request;
+use App\Models\HistorialAfiliado;
 
 class AfiliadoController extends Controller
 {
@@ -25,7 +26,10 @@ class AfiliadoController extends Controller
             });
         }
 
-        $afiliados = $query->paginate(2)->withQueryString();
+        $afiliados = $query
+            ->orderBy('fecha_afiliacion', 'desc') // ✅ ORDEN CORRECTO
+            ->paginate(2)
+            ->withQueryString();
 
         return view('afiliados.index', compact('afiliados'));
     }
@@ -38,7 +42,8 @@ class AfiliadoController extends Controller
             'empresa',
             'cargasFamiliares',
             'pagoCuota',
-            'beneficio'
+            'beneficio',
+            'historial'
         ])->findOrFail($id);
 
         $origen = $request->get('origen'); // 👈 ACA ESTA LA CLAVE
@@ -90,7 +95,7 @@ class AfiliadoController extends Controller
         'jornada_laboral' => 'nullable|string|max:100',
 
         // SINDICAL
-        'fecha_afiliacion' => 'nullable|date',
+        
         
         'delegacion_sindical' => 'nullable|string|max:100',
 
@@ -212,7 +217,7 @@ class AfiliadoController extends Controller
         'jornada_laboral' => 'nullable|string|max:100',
 
         // SINDICAL
-        'fecha_afiliacion' => 'nullable|date',
+        
         'seccional' => 'nullable|string|max:100',
         'delegacion_sindical' => 'nullable|string|max:100',
 
@@ -225,6 +230,9 @@ class AfiliadoController extends Controller
         'foto_recibo_sueldo' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
         'foto_constancia_laboral' => 'nullable|image|mimes:jpg,jpeg,png|max:10240',
     ]);
+
+    // 🔥 MUY IMPORTANTE: evitar que se sobrescriba la fecha
+    unset($data['fecha_afiliacion']);
 
 
         // ACTUALIZAR IMÁGENES SI SE SUBEN NUEVAS
@@ -272,6 +280,11 @@ class AfiliadoController extends Controller
         $afiliado->fecha_afiliacion = now();
 
         $afiliado->save();
+        // 🔥 HISTORIAL
+        $afiliado->historial()->create([
+            'estado' => 'alta',
+            'observacion' => 'Afiliado aprobado y dado de alta'
+        ]);
 
         return redirect()->route('afiliados.solicitudes')
             ->with('mensaje','Afiliado aprobado correctamente');
@@ -305,7 +318,18 @@ class AfiliadoController extends Controller
         $afiliado = Afiliado::findOrFail($id);
 
         $afiliado->estado_afiliado = 'activo';
+
+        // 🔥 SI VENÍA DE BAJA → limpiar fecha_baja
+        if ($afiliado->fecha_baja) {
+            $afiliado->fecha_baja = null;
+        }
         $afiliado->save();
+
+        // 🔥 HISTORIAL
+        $afiliado->historial()->create([
+            'estado' => 'reactivado',
+            'observacion' => 'Afiliado reactivado'
+        ]);
 
         return back()->with('mensaje','Afiliado activado');
     }
@@ -321,6 +345,12 @@ class AfiliadoController extends Controller
         $afiliado->observaciones = $request->observaciones;
 
         $afiliado->save();
+
+        // 🔥 HISTORIAL
+        $afiliado->historial()->create([
+            'estado' => 'suspendido',
+            'observacion' => $request->observaciones
+        ]);
 
         return back()->with('mensaje','Afiliado suspendido');
     }
@@ -349,10 +379,55 @@ class AfiliadoController extends Controller
         }
 
         // 📄 PAGINACIÓN
-        $solicitudes = $query->paginate(2)->withQueryString();
+        // ⬇️ ORDEN + PAGINACIÓN
+        $solicitudes = $query
+            ->latest() // 👈 LOS MÁS NUEVOS PRIMERO
+            ->paginate(2)
+            ->withQueryString();
 
         return view('afiliados.solicitudes', compact('solicitudes'));
     }
+
+    public function baja(Request $request, $id)
+    {
+        $request->validate([
+            'motivo_baja' => 'required|string'
+        ]);
+
+        $afiliado = Afiliado::findOrFail($id);
+
+        $afiliado->estado_afiliado = 'baja';
+        $afiliado->fecha_baja = now();
+        $afiliado->motivo_baja = $request->motivo_baja;
+        $afiliado->save();
+
+        // 🔥 HISTORIAL
+        $afiliado->historial()->create([
+            'estado' => 'baja',
+            'observacion' => $request->motivo_baja
+        ]);
+
+        return back()->with('mensaje','Afiliado dado de baja');
+    }
+
+    public function altaDirecta($id)
+    {
+        $afiliado = Afiliado::findOrFail($id);
+
+        $afiliado->estado_afiliado = 'activo';
+        $afiliado->fecha_afiliacion = now();
+        $afiliado->save();
+
+        // 🔥 HISTORIAL
+        $afiliado->historial()->create([
+            'estado' => 'alta_directa',
+            'observacion' => 'Reingreso sin solicitud'
+        ]);
+
+        return back()->with('mensaje','Afiliado dado de alta nuevamente');
+    }
+
+    
     
 
 }

@@ -307,6 +307,47 @@
                             </form>
                         @endif
                     @endif
+@if ($afiliado->estado_afiliado != 'baja')
+
+<form method="POST" action="{{ route('afiliados.baja', $afiliado->id) }}">
+    @csrf
+
+    <textarea name="motivo_baja" class="form-control mb-2" placeholder="Motivo de baja" required></textarea>
+
+    <button class="btn btn-danger">Dar de Baja</button>
+</form>
+
+@endif
+                    {{-- ===================== HISTORIAL ===================== --}}
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="card-header bg-light">
+        <strong>📜 Historial del Afiliado</strong>
+    </div>
+
+    <div class="card-body">
+
+        @if($afiliado->historial->count())
+
+            <ul class="list-group">
+
+                @foreach($afiliado->historial->sortByDesc('created_at') as $item)
+
+                    <li class="list-group-item">
+                        <strong>{{ strtoupper($item->estado) }}</strong><br>
+                        🕒 {{ $item->created_at->format('d/m/Y H:i') }}<br>
+                        📝 {{ $item->observacion ?? '-' }}
+                    </li>
+
+                @endforeach
+
+            </ul>
+
+        @else
+            <div class="text-muted">Sin historial</div>
+        @endif
+
+    </div>
+</div>
 
 
 
