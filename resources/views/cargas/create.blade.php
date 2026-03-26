@@ -93,7 +93,7 @@
                     {{-- DOCUMENTACIÓN HIJO --}}
                     <div class="row hijo-doc" style="display:none;">
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">📄 Partida de nacimiento</label>
                             <input type="file" name="foto_partida_nacimiento" class="form-control">
                         </div>
@@ -113,16 +113,10 @@
                             </div>
                         </div>
 
-                        
-                    </div>
+                    </div>         
+                                  
 
                     
-
-                    
-
-                
-
-                    </div>
                     {{-- ===================== DNI ===================== --}}
                     <div class="row mt-3">
 
@@ -151,13 +145,13 @@
                         
 
                         {{-- ESCOLARIDAD --}}
-                        <div class="col-md-4 mb-3 escolaridad-doc" style="display:none;">
+                        <div class="col-md-6 mb-3 escolaridad-doc" style="display:none;">
                             <label class="form-label fw-bold">🏫 Certificado escolaridad</label>
                             <input type="file" name="constancia_escolaridad" class="form-control">
                         </div>
 
                                 {{-- DISCAPACIDAD --}}
-                                <div class="col-md-4 mb-3 discapacidad-doc" style="display:none;">
+                                <div class="col-md-6 mb-3 discapacidad-doc" style="display:none;">
                                     <label class="form-label fw-bold">♿ Certificado discapacidad</label>
                                     <input type="file" name="certificado_discapacidad" class="form-control">
                                 </div>

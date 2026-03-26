@@ -59,18 +59,21 @@ class CargaFamiliarController extends Controller
 
         // ===================== DNI (SIEMPRE) =====================
         if ($request->hasFile('dni_frente')) {
-            $data['dni_frente'] = $request->file('dni_frente')->store('cargas/dni', 'public');
+            $data['foto_dni_frente'] = $request->file('dni_frente')->store('cargas/dni', 'public');
         }
 
         if ($request->hasFile('dni_dorso')) {
             $data['dni_dorso'] = $request->file('dni_dorso')->store('cargas/dni', 'public');
         }
 
-        // ===================== HIJO / HIJASTRO =====================
-        if (in_array($request->parentesco, ['Hijo', 'Hijastro'])) {
+       // NORMALIZAR
+            $parentesco = trim(strtolower($request->parentesco));
+
+            // ===================== HIJO / HIJASTRO =====================
+            if (in_array($parentesco, ['hijo', 'hijastro'])) {
 
             if ($request->hasFile('foto_partida_nacimiento')) {
-                $data['foto_partida_nacimiento'] = $request->file('foto_partida_nacimiento')
+                $data['partida_nacimiento'] = $request->file('foto_partida_nacimiento')
                     ->store('cargas/partidas', 'public');
             }
 
@@ -86,7 +89,7 @@ class CargaFamiliarController extends Controller
         }
 
         // ===================== CONYUGE =====================
-        if ($request->parentesco == 'Cónyuge') {
+        if ($parentesco == 'cónyuge' || $parentesco == 'conyuge') {
 
             if ($request->hasFile('foto_acta_matrimonio')) {
                 $data['foto_acta_matrimonio'] = $request->file('foto_acta_matrimonio')
@@ -145,29 +148,31 @@ class CargaFamiliarController extends Controller
 
         $data = $validated;
 
-        // ===================== DNI =====================
-        if ($request->hasFile('dni_frente')) {
-            if ($carga->dni_frente) {
-                Storage::disk('public')->delete($carga->dni_frente);
-            }
-            $data['dni_frente'] = $request->file('dni_frente')->store('cargas/dni', 'public');
-        }
+       // ===================== DNI =====================
+if ($request->hasFile('dni_frente')) {
+    if ($carga->foto_dni_frente) {
+        Storage::disk('public')->delete($carga->foto_dni_frente);
+    }
+    $data['foto_dni_frente'] = $request->file('dni_frente')->store('cargas/dni', 'public');
+}
 
-        if ($request->hasFile('dni_dorso')) {
-            if ($carga->dni_dorso) {
-                Storage::disk('public')->delete($carga->dni_dorso);
-            }
-            $data['dni_dorso'] = $request->file('dni_dorso')->store('cargas/dni', 'public');
-        }
+if ($request->hasFile('dni_dorso')) {
+    if ($carga->foto_dni_dorso) {
+        Storage::disk('public')->delete($carga->foto_dni_dorso);
+    }
+    $data['foto_dni_dorso'] = $request->file('dni_dorso')->store('cargas/dni', 'public');
+}
 
-        // ===================== HIJO / HIJASTRO =====================
-        if (in_array($request->parentesco, ['Hijo', 'Hijastro'])) {
+// ===================== HIJO / HIJASTRO =====================
+        $parentesco = trim(strtolower($request->parentesco));
+
+        if (in_array($parentesco, ['hijo', 'hijastro'])) {
 
             if ($request->hasFile('foto_partida_nacimiento')) {
-                if ($carga->foto_partida_nacimiento) {
-                    Storage::disk('public')->delete($carga->foto_partida_nacimiento);
+                if ($carga->partida_nacimiento) {
+                    Storage::disk('public')->delete($carga->partida_nacimiento);
                 }
-                $data['foto_partida_nacimiento'] = $request->file('foto_partida_nacimiento')
+                $data['partida_nacimiento'] = $request->file('foto_partida_nacimiento')
                     ->store('cargas/partidas', 'public');
             }
 
@@ -189,7 +194,7 @@ class CargaFamiliarController extends Controller
         }
 
         // ===================== CONYUGE =====================
-        if ($request->parentesco == 'Cónyuge') {
+        if ($parentesco == 'cónyuge' || $parentesco == 'conyuge') {
 
             if ($request->hasFile('foto_acta_matrimonio')) {
                 if ($carga->foto_acta_matrimonio) {

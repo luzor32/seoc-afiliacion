@@ -305,7 +305,7 @@ class AfiliadoController extends Controller
 
         $afiliado->estado_solicitud = 'rechazada';
         $afiliado->estado_afiliado = null;
-        $afiliado->observaciones = $request->observaciones;
+        $afiliado->observacion = $request->observacion;
 
         $afiliado->save();
 
@@ -327,7 +327,7 @@ class AfiliadoController extends Controller
 
         // 🔥 HISTORIAL
         $afiliado->historial()->create([
-            'estado' => 'reactivado',
+            'estado' => 'activo',
             'observacion' => 'Afiliado reactivado'
         ]);
 
@@ -341,12 +341,12 @@ class AfiliadoController extends Controller
 
         $afiliado = Afiliado::findOrFail($id);
 
+        // ✔ AFILIADO (plural)
         $afiliado->estado_afiliado = 'suspendido';
         $afiliado->observaciones = $request->observaciones;
-
         $afiliado->save();
 
-        // 🔥 HISTORIAL
+        // ✔ HISTORIAL (singular)
         $afiliado->historial()->create([
             'estado' => 'suspendido',
             'observacion' => $request->observaciones
@@ -425,6 +425,17 @@ class AfiliadoController extends Controller
         ]);
 
         return back()->with('mensaje','Afiliado dado de alta nuevamente');
+    }
+
+    public function historial($id)
+    {
+        $afiliado = Afiliado::findOrFail($id);
+
+        $historial = HistorialAfiliado::where('afiliado_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('afiliados.historial', compact('afiliado', 'historial'));
     }
 
     
